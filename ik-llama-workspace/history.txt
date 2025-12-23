@@ -1,0 +1,356 @@
+    1  apt update
+    2  apt-get install git build-essential cmake ccache
+    3  apt-get install nvidia-cuda-toolkit
+    4  nvcc --version
+    5  git clone https://github.com/ikawrakow/ik_llama.cpp.git
+    6  cd ik_llama.cpp/
+    7  cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1
+    8  nproc
+    9  cmake --build build --config Release -j $(nproc)
+   10  ./build/bin/llama-server --version
+   11  ls -l
+   12  exit
+   13  nvcc
+   14  nvcc -v
+   15  nvcc --version
+   16  apt-get update
+   17  apt-get install git build-essential cmake ccache nvidia-cuda-toolkit 
+   18  ls -l
+   19  cd ik_llama.cpp/
+   20  ls
+   21  ls -l /models/
+   22  ls -l /models/ik-llama-models/
+   23  cd build
+   24  rm -rf *
+   25  git remote update
+   26  git status
+   27  git pull --rebase origin main
+   28  cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1
+   29  cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1 ..
+   30  nvidia-smi
+   31  apt install linux-oem-24.04c
+   32  cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1 ..
+   33  apt remove -y nvidia-cuda-toolkit
+   34  nvcc --version
+   35  cd ..
+   36  rm -rf build
+   37  mkdir build
+   38  cd build
+   39  cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1 ..
+   40  cmake --build build --config Release -j $(nproc)
+   41  ls -l
+   42  ./build/bin/llama-server   --model /models/ik-llama-models/DeepSeek-R1-0528-GGUF_IQ1_S_R4/DeepSeek-R1-0528-IQ1_S_R4-00001-of-00003.gguf   --alias ubergarm/DeepSeek-R1-0528-IQ1_S_R4   -fa -fmoe   -mla 3 -amb 512   -ctk q8_0   -c 16384   -ngl 99   -ot "blk\.(3|4|5)\.ffn_.*=CUDA0"   -ot exps=CPU   --parallel 1   --threads 16   --host 127.0.0.1   --port 8080
+   43  ./build/bin/llama-server --model /models/ik-llama-models/DeepSeek-R1-0528-GGUF_IQ1_S_R4/DeepSeek-R1-0528-IQ1_S_R4-00001-of-00003.gguf --alias ubergarm/DeepSeek-R1-0528-IQ1_S_R4 -fa -fmoe -mla 3 -amb 512-ctk q8_0 -c 16384 -ngl 99 -ot "blk\.(0|1|2|3|4|5|6|7)\.ffn_.*=CUDA0"   -ot exps=CPU   --parallel 1   --threads 16   --host 127.0.0.1   --port 8080
+   44  ./build/bin/llama-server --model /models/ik-llama-models/DeepSeek-R1-0528-GGUF_IQ1_S_R4/DeepSeek-R1-0528-IQ1_S_R4-00001-of-00003.gguf --alias ubergarm/DeepSeek-R1-0528-IQ1_S_R4 -fa -fmoe -mla 3 -amb 512 -ctk q8_0 -c 16384 -ngl 99 -ot "blk\.(0|1|2|3|4|5|6|7)\.ffn_.*=CUDA0"   -ot exps=CPU   --parallel 1   --threads 16   --host 127.0.0.1   --port 8080
+   45  cp -r /models/ik-llama-models/DeepSeek-R1-0528-GGUF_IQ1_S_R4 .
+   46  l s-lc
+   47  ls -l
+   48  cat llama.log 
+   49  nproc
+   50  ./build/bin/llama-server --model ./DeepSeek-R1-0528-GGUF_IQ1_S_R4/DeepSeek-R1-0528-IQ1_S_R4-00001-of-00003.gguf --alias ubergarm/DeepSeek-R1-0528-IQ1_S_R4 -fa -fmoe -mla 3 -amb 512 -ctk q8_0 -c 16384 -ngl 99 -ot "blk\.(0|1|2|3|4|5|6|7|8|9|10)\.ffn_.*=CUDA0" -ot exps=CPU --parallel 1 --threads 16 --host 127.0.0.1 --port 8080
+   51  ./build/bin/llama-server --model ./DeepSeek-R1-0528-GGUF_IQ1_S_R4/DeepSeek-R1-0528-IQ1_S_R4-00001-of-00003.gguf --alias ubergarm/DeepSeek-R1-0528-IQ1_S_R4 -fa -fmoe -mla 3 -amb 512 -ctk q8_0 -c 32768 -ngl 99 -ot "blk\.(0|1|2|3|4|5|6|7|8|9|10)\.ffn_.*=CUDA0" -ot exps=CPU --parallel 1 --threads 16 --host 127.0.0.1 --port 8080
+   52  exit
+   53  ls -l
+   54  cd ../ik_llama.cpp/
+   55  ls
+   56  cd build/
+   57  ls
+   58  cd build/
+   59  ls
+   60  cd ..
+   61  ls
+   62  cd ..
+   63  ls
+   64  find . -name bindings
+   65  git status
+   66  find . -name *.py
+   67  find . -name "*.py"
+   68  history
+   69  cd ..
+   70  git clone https://github.com/abetlen/llama-cpp-python.git
+   71  cd llama-cpp-python/
+   72  ls
+   73  rm -rf llama_cpp
+   74  git status
+   75  git checkout .
+   76  git status
+   77  ls -l
+   78  ls -l vendor/
+   79  ls -lR vendor/
+   80  cd ..
+   81  rm -rf llama-cpp-python/
+   82  git clone --recurse-submodules https://github.com/abetlen/llama-cpp-python.git
+   83  rm -rf llama-cpp-python
+   84  git clone https://github.com/abetlen/llama-cpp-python.git
+   85  cd llama-cpp-python/
+   86  ls
+   87  cd vendor/
+   88  ls
+   89  rm -rf llama.cpp
+   90  ln -s /workspace/ik_llama.cpp llama.cpp
+   91  cd ..
+   92  ls -l
+   93  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1 -DCMAKE_BUILD_TYPE=Release"     pip install -e .
+   94  python --version
+   95  app list | grep python
+   96  apt list | grep python
+   97  apt install python3.12 python3.12-dev
+   98  python --version
+   99  python3
+  100  python3 --version
+  101  apt install python-is-python3
+  102  python --version
+  103  python -m venv /root/venv
+  104  apt install python3.12-venv
+  105  apt autoremove
+  106  python -m venv /root/venv
+  107  source /root/venv/bin/activate
+  108  ls -l
+  109  ls -l vendor
+  110  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1 -DCMAKE_BUILD_TYPE=Release"     pip install -e .
+  111  cd ../ik_llama.cpp/
+  112  ls
+  113  rm -rf build
+  114  history
+  115  cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1
+  116  ls -l
+  117  ls -l vendor
+  118  ls -l vendors
+  119  cd ../llama-cpp-python/vendor/
+  120  ls
+  121  ls -l
+  122  cd ..
+  123  ls
+  124  ls-l
+  125  ls -l
+  126  mkdir carmella
+  127  cd carmella/
+  128  ls
+  129  cd ..
+  130  ls -l
+  131  python --version
+  132  rm -rf /root/venv
+  133  python -m venv /root/venv
+  134  ls -ltr /root/venv
+  135  ls -ltr /root/venv/bin/
+  136  source /root/bin/activate
+  137  source /root/venv/bin/activate
+  138  ls -l
+  139  cd ik_llama.cpp/
+  140  ls
+  141  ls -l
+  142  cd ..
+  143  ls -l
+  144  cd llama-cpp-python/
+  145  ls
+  146  CMAKE_ARGS="-DGGML_CUDA=ON" pip install --no-cache-dir llama-cpp-python
+  147  ls -l
+  148  cd vendor/llama.cpp
+  149  ls
+  150  rm -rf build
+  151  cd -
+  152  ls -l
+  153  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1" pip install --no-cache-dir llama-cpp-python
+  154  pip uninstall llama-cpp-python
+  155  deactivate
+  156  rm -rf /root/venv
+  157  python -m venv /root/venv
+  158  source /root/venv/bin/activate
+  159  python -m pip install --upgrade pip
+  160  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1" pip install --no-cache-dir llama-cpp-python
+  161  deactivate 
+  162  rm -rf /root/venv
+  163  python -m venv /root/venv
+  164  source /root/venv/bin/activate
+  165  python -m pip install --upgrade pip
+  166  CMAKE_ARGS="-DGGML_CUDA=ON" pip install --no-cache-dir llama-cpp-python
+  167  deactivate 
+  168  rm -rf /root/venv
+  169  python -m venv /root/venv
+  170  source /root/venv/bin/activate
+  171  python -m pip install --upgrade pip
+  172  CMAKE_ARGS="-DGGML_CUDA=ON" pip install -e .
+  173  CMAKE_ARGS="-DGGML_CUDA=ON" pip install --no-binary llama-cpp-python llama-cpp-python
+  174  ls -l
+  175  cat CMakeLists.txt 
+  176  CMAKE_ARGS="-DGGML_CUDA=ON" pip install -e .
+  177  grep -r mtmd
+  178  grep -r cmake
+  179  cat README.md 
+  180  less README.md 
+  181  cat CMakeLists.txt 
+  182  cd vendor/llama.cpp
+  183  cmake -B build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1 ..
+  184  cmake -B build -DBUILD_SHARED_LIBS=ON -DGGML_CUDA=ON -DGGML_SCHED_MAX_COPIES=1
+  185  cmake --build build -j $(nproc)
+  186  cd ../..
+  187  grep -r tools
+  188  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip install -e .
+  189  deactivate 
+  190  rm -rf /root/venv
+  191  python -m venv /root/venv
+  192  source /root/venv/bin/activate
+  193  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip install -e .
+  194  ls -l
+  195  ls -l /root/venv/lib/python3.12/site-packages/
+  196  docker ps
+  197  cd /root
+  198  ls -al
+  199  ps -ef
+  200  rm -rf .vscode-server
+  201  exit
+  202  rm -rf /root/venv/
+  203  python -m venv /root/venv
+  204  source /root/venv/bin/activate
+  205  python -m pip install --upgrade pip
+  206  cd llama-cpp-python/
+  207  ls
+  208  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip build
+  209  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip install build
+  210  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" python -m build --wheel
+  211  ls -l
+  212  git status
+  213  unzip -l 
+  214  apt install unzip
+  215  nvidia-smi
+  216  ls -l
+  217  deactivate 
+  218  rm -rf /root/venv/
+  219  python -m venv /root/venv
+  220  source /root/venv/bin/activate
+  221  python -m pip install --upgrade pip
+  222  ls -l
+  223  git clean -dxf
+  224  ls -l
+  225  cd ../ik_llama.cpp/
+  226  git clean -dxf
+  227  cd -
+  228  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip install -e .
+  229  unzip -l
+  230  ls -l 
+  231  cd llama_cpp/lib/
+  232  ls
+  233  ls -l
+  234  cd ..
+  235  ls -l
+  236  python -c "import llama_cpp; print(llama_cpp.llama_load_model)"
+  237  cd ../ik_llama.cpp/
+  238  cmake -B build -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF -DCMAKE_BUILD_TYPE=Release
+  239  cmake --build build --config Release
+  240  cmake --install build
+  241  python -c "import llama_cpp; print(llama_cpp.llama_load_model)"
+  242  grep -r llama_sampler_chain_default_params
+  243  grep -r -i version
+  244  git log
+  245  git rebase c5a8d4b749352645afd4c024f85d6eca2ca72c6d
+  246  git log
+  247  git remote add source git@github.com:ggml-org/llama.cpp.git
+  248  git remote update
+  249  git remote
+  250  git remote -v
+  251  git remote rm source
+  252  git remote add source https://github.com/ggml-org/llama.cpp.git
+  253  git remote update
+  254  git log 
+  255  git log source
+  256  git branch -r
+  257  git log source/master
+  258  git rebase source/master
+  259  git rebase --abort
+  260  git status
+  261  git log | head
+  262  git reset --hard HEAD
+  263  git status
+  264  git checkout -b tmp
+  265  git branch
+  266  git branch -D main
+  267  git checkout origin/main -b main
+  268  git status
+  269  git log
+  270  git checkout -b one_commit
+  271  git reset c5a8d4b749352645afd4c024f85d6eca2ca72c6d
+  272  git status
+  273  git add -A .
+  274  git status
+  275  git commit -m "ik all"
+  276  git log
+  277  git checkout source/master -b master
+  278  git cherry-pick 1c41848255f7bd90ce0d045d44c565cb9c1c6558
+  279  git cherry-pick --abort
+  280  git status
+  281  git log
+  282  git branch
+  283  git branch | xargs git branch -D
+  284  git status
+  285  ls -l
+  286  git checkout -b tmp
+  287  git branch | xargs git branch -D
+  288  git branch
+  289  git remote update
+  290  git checkout origin/main -b main
+  291  git branch | xargs git branch -D
+  292  git status
+  293  git branch
+  294  cd ../llama-cpp-python/
+  295  git log
+  296  git checkout v0.3.9
+  297  deactivate 
+  298  rm -rf /root/venv
+  299  python -m venv /root/venv
+  300  source /root/venv/bin/activate
+  301  python -m pip install --upgrade pip
+  302  git status
+  303  ls -l vendor/
+  304  cd vendor/
+  305  rmdir llama.cpp/
+  306  ln -s /workspace/ik_llama.cpp /workspace/llama-cpp-python/vendor/llama.cpp
+  307  cd ..
+  308  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip install -e .
+  309  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON" pip install -e .
+  310  git 
+  311  git status
+  312  CMAKE_ARGS="-DGGML_CUDA=ON -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=ON -DLLAVA_BUILD=OFF" pip install -e .
+  313  python -c "import llama_cpp; print(llama_cpp.llama_load_model)"
+  314  git status
+  315  llama_sampler_chain_default_params
+  316  grep -r llama_sampler_chain_default_params
+  317  cd ../ik_llama.cpp/
+  318  grep -r llama_sampler_chain_default_params
+  319  git status
+  320  git checkout c5a8d4b749352645afd4c024f85d6eca2ca72c6d
+  321  grep -r llama_sampler_chain_default_params
+  322  git log
+  323  grep -r llama_sampler_chain_default_params
+  324  cd -
+  325  grep -r llama_sampler_chain_default_params
+  326  exit
+  327  ls -l
+  328  cd ik_llama.cpp/
+  329  ls
+  330  git remote update
+  331  git status
+  332  git checkout main
+  333  git pull --rebase origin main
+  334  ls -l
+  335  exit
+  336  history
+  337  exit
+  338  ls -l
+  339  cmake --optios
+  340  cmake --help
+  341  grep -r -i nvcc
+  342  grep -r -i nvcc | grep -v build
+  343  grep -r CUDA_ARCHITECTURES
+  344  cd ik_llama.cpp/
+  345  ls
+  346  ls -altr
+  347  git remote update
+  348  git pull --rebase origin main
+  349  git status
+  350  grep -r CUDA_ARCHITECTURES
+  351  exit
+  352  nm -D /usr/local/cuda/lib64/stubs/libcuda.so | grep cuMemCreate
+  353  exit
+  354  mount
+  355  ls -l
+  356  history > history.txt

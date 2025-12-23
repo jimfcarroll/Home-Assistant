@@ -1,0 +1,12 @@
+langchain[all]
+langgraph
+langchain-openai
+langchain-community
+
+duckduckgo-search
+requests
+pydantic
+readability-lxml
+lxml
+aiohttp
+bs4

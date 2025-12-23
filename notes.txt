@@ -1,0 +1,14 @@
+Raw openai api curl command hit.
+
+curl -N http://127.0.0.1:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "model",
+    "stream": true,
+    "messages": [
+      { "role": "user", "content": "Think step by step. What is 17 * 23?" }
+    ],
+    "max_tokens": 256
+  }'
+
+

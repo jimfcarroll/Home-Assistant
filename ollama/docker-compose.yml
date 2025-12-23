@@ -1,0 +1,60 @@
+services:
+  searxng:
+    container_name: searxng
+    image: searxng/searxng:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_HOSTNAME=localhost:8080/
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+        
+  ollama:
+    image: ollama-nvidia:cuda-12.9.1-cudnn-devel-ubuntu24.04
+    container_name: ollama
+    runtime: nvidia
+    environment:
+      - OLLAMA_MODELS=/models/ollama
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - /models/ollama:/models/ollama
+    ports:
+      - "11434:11434"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    depends_on:
+      - searxng
+    restart: unless-stopped
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: openwebui
+    volumes:
+      - /data/openwebui:/app/backend/data    
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - ENABLE_RAG_WEB_SEARCH=True
+      - RAG_WEB_SEARCH_ENGINE="searxng"
+      - RAG_WEB_SEARCH_RESULT_COUNT=20
+      - RAG_WEB_SEARCH_CONCURRENT_REQUESTS=10
+      - RAG_WEB_SEARCH_RETRIEVE_PAGE=True
+#      - RAG_WEB_SEARCH_PARSE_HTML=True
+      - RAG_WEB_SEARCH_MAX_CHARS=12000
+      - RAG_WEB_SEARCH_CHUNK_SIZE=1500
+      - SEARXNG_QUERY_URL="http://searxng:8080/search?format=json&q=<query>"      
+    depends_on:
+      - ollama
+    restart: unless-stopped
