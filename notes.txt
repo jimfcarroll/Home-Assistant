@@ -12,3 +12,6 @@ curl -N http://127.0.0.1:8080/v1/chat/completions \
   }'
 
 
+starting ik-llama.cpp which has more knobs: working/ik_llama.cpp/build/bin/llama-server -v --model /models/ik-llama-models/Llama-4-Scout-17B-16E-Instruct-UD-Q4_K_XL/Llama-4-Scout-17B-16E-Instruct-UD-Q4_K_XL-00001-of-00002.gguf --no-mmap --alias current --jinja -fa on -mla 3 -amb 512 -ctk q8_0 -c 32768 -ngl 999 -ot exps=CPU --parallel 1 --threads 16 --host 127.0.0.1 --port 8080
+
+starting llama.cpp: /working/llama.cpp/build/bin/llama-server -v --chat-template-file /models/ik-llama-models/Llama-4-Scout-17B-16E-Instruct-UD-Q4_K_XL/chat_template.json --model /models/ik-llama-models/Llama-4-Scout-17B-16E-Instruct-UD-Q4_K_XL/Llama-4-Scout-17B-16E-Instruct-UD-Q4_K_XL-00001-of-00002.gguf --alias current --jinja -fa on -c 32768 -ngl 999 --parallel 1 --threads 24 --host 127.0.0.1 --port 8080

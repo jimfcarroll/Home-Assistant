@@ -4,6 +4,7 @@ from typing import Any, List, TypedDict, cast
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
+from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_core.callbacks.base import BaseCallbackHandler
 from langchain_core.messages import (AIMessage, BaseMessage, HumanMessage,
                                      SystemMessage, ToolMessage)
@@ -11,10 +12,107 @@ from langchain_core.outputs import LLMResult
 from langchain_core.tools import Tool, tool
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph
-from langchain_community.document_loaders import PlaywrightURLLoader
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
+from playwright.sync_api import sync_playwright
 
 import patches
 
+debug = False
+
+def render_page(url: str, timeout_ms: int = 30000) -> str:
+    """
+    Render a web page locally and return LLM-suitable visible text.
+    JS-capable, deterministic, no SaaS, no embeddings, no loaders.
+    """
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled",
+            ],
+        )
+
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1280, "height": 1800},
+        )
+
+        page = context.new_page()
+
+        try:
+            # Load DOM only (never hangs)
+            page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+
+            # Allow hydration
+            page.wait_for_timeout(2000)
+
+            # Trigger lazy content
+            page.evaluate(
+                """
+                async () => {
+                    for (let i = 0; i < 8; i++) {
+                        window.scrollBy(0, window.innerHeight);
+                        await new Promise(r => setTimeout(r, 400));
+                    }
+                }
+                """
+            )
+
+            # Small settle
+            page.wait_for_timeout(800)
+
+            # Extract readable visible text
+            text = page.evaluate(
+                """
+                () => {
+                    const walker = document.createTreeWalker(
+                        document.body,
+                        NodeFilter.SHOW_TEXT,
+                        {
+                            acceptNode(node) {
+                                const t = node.textContent.trim();
+                                if (!t || t.length < 2) return NodeFilter.FILTER_REJECT;
+
+                                const el = node.parentElement;
+                                if (!el) return NodeFilter.FILTER_REJECT;
+
+                                const style = window.getComputedStyle(el);
+                                if (style.display === "none" || style.visibility === "hidden")
+                                    return NodeFilter.FILTER_REJECT;
+
+                                return NodeFilter.FILTER_ACCEPT;
+                            }
+                        }
+                    );
+
+                    let lines = [];
+                    let n;
+                    while (n = walker.nextNode()) {
+                        lines.push(n.textContent.trim());
+                    }
+
+                    return lines.join("\\n");
+                }
+                """
+            )
+
+        except PlaywrightTimeout:
+            text = "ERROR: Page load timed out"
+
+        finally:
+            context.close()
+            browser.close()
+
+    # LLM safety cap
+    return text[:50_000]
 
 class ReasoningStdOutCallback(BaseCallbackHandler):
     def __init__(self):
@@ -45,10 +143,11 @@ class ReasoningStdOutCallback(BaseCallbackHandler):
             doIt = True
     
         if doIt:
-            print("\n===============================")
-            for key, value in kwargs.items():
-                print(f"{key} = {value}")            
-            print("===============================", flush=True)
+            if debug:
+                print("\n===============================")
+                for key, value in kwargs.items():
+                    print(f"{key} = {value}")            
+                print("===============================", flush=True)
             msg : AIMessage =  getattr(chunk, "message", None)
             content_blocks = msg.content_blocks
             print(content_blocks)
@@ -91,18 +190,22 @@ def web_search(query: str) -> str:
     """
     Search the internet for current facts and information.
 
-    Format your query starting with the intent first, then the context.
+    - Format your query starting with the intent first, then the context. 
+    - You will get a list of urls back. 
+    - use the urls to read the web pages
     """
     with DDGS() as ddgs:
         results = ddgs.text(query, max_results=5)
         index = 0
         ret = "".join(
-            f"\nRESULT {i}, URL={r['href']} DESCRIPTION: {r['body']}"
+            #f"\nURL={r['href']} DESCRIPTION: {r['body']}"
+            f"\n{r['href']}"
             for i,r in enumerate(results)
         )
-        print("\n======== web search ==========")
-        print(ret)
-        print("==============================", flush=True)
+        if debug:
+            print("\n======== web search ==========")
+            print(ret)
+            print("==============================", flush=True)
         return ret
 
 @tool
@@ -111,12 +214,12 @@ def read_web_page(url: str) -> str:
     Fetch and read the contents of a web page, extracting visible text for further analysis.
     """
     try:
-        loader = PlaywrightURLLoader(urls=[url])
-        docs = loader.load()
-        print("\n======== page read ==========")
-        print(docs[0].page_content[:500])  # preview only
-        print("==============================", flush=True)
-        return docs[0].page_content[:5000]
+        res = render_page(url)
+        if debug:
+            print("\n======== page read ==========")
+            print(res[:5000])  # preview only
+            print("==============================", flush=True)
+        return res
     except Exception as e:
         return f"Failed to render page: {e}"
     
@@ -150,7 +253,7 @@ def tool_node(state: AgentState):
     tool_name = tool_call["name"]
     args = tool_call["args"]
 
-    print(f"(tool:{tool_name} {args})", end="", flush=True)
+    #print(f"(tool:{tool_name} {args})", end="", flush=True)
 
     # Dynamically get the tool by name
     tool_func = globals().get(tool_name)
@@ -170,9 +273,10 @@ def tool_node(state: AgentState):
 def should_use_tool(state: AgentState):
     last = state["messages"][-1]
     ret = "tool" if getattr(last, "tool_calls", None) else "__end__"
-    print("\n======== should use tool ==========")
-    print(f"{last}\n\n{ret}")
-    print("==============================", flush=True)
+    if debug:
+        print("\n======== should use tool ==========")
+        print(f"{last}\n\n{ret}")
+        print("==============================", flush=True)
     return ret
 
 
@@ -210,7 +314,7 @@ Context:
 """
         ),
         HumanMessage(
-            content="Why are you?"
+            content="What is tomorrow's weather"
         )
     ]
 })
