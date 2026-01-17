@@ -1,118 +1,20 @@
 from datetime import date, datetime
 from typing import Any, List, TypedDict, cast
 
-import requests
-from bs4 import BeautifulSoup
 from ddgs import DDGS
-from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_core.callbacks.base import BaseCallbackHandler
 from langchain_core.messages import (AIMessage, BaseMessage, HumanMessage,
                                      SystemMessage, ToolMessage)
 from langchain_core.outputs import LLMResult
-from langchain_core.tools import Tool, tool
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph
-from playwright.sync_api import TimeoutError as PlaywrightTimeout
-from playwright.sync_api import sync_playwright
+from tts import tts
 
 import patches
+from read_web import _post_crawl, _shape_pages_for_llm
 
-debug = False
-
-def render_page(url: str, timeout_ms: int = 30000) -> str:
-    """
-    Render a web page locally and return LLM-suitable visible text.
-    JS-capable, deterministic, no SaaS, no embeddings, no loaders.
-    """
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled",
-            ],
-        )
-
-        context = browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
-            ),
-            viewport={"width": 1280, "height": 1800},
-        )
-
-        page = context.new_page()
-
-        try:
-            # Load DOM only (never hangs)
-            page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
-
-            # Allow hydration
-            page.wait_for_timeout(2000)
-
-            # Trigger lazy content
-            page.evaluate(
-                """
-                async () => {
-                    for (let i = 0; i < 8; i++) {
-                        window.scrollBy(0, window.innerHeight);
-                        await new Promise(r => setTimeout(r, 400));
-                    }
-                }
-                """
-            )
-
-            # Small settle
-            page.wait_for_timeout(800)
-
-            # Extract readable visible text
-            text = page.evaluate(
-                """
-                () => {
-                    const walker = document.createTreeWalker(
-                        document.body,
-                        NodeFilter.SHOW_TEXT,
-                        {
-                            acceptNode(node) {
-                                const t = node.textContent.trim();
-                                if (!t || t.length < 2) return NodeFilter.FILTER_REJECT;
-
-                                const el = node.parentElement;
-                                if (!el) return NodeFilter.FILTER_REJECT;
-
-                                const style = window.getComputedStyle(el);
-                                if (style.display === "none" || style.visibility === "hidden")
-                                    return NodeFilter.FILTER_REJECT;
-
-                                return NodeFilter.FILTER_ACCEPT;
-                            }
-                        }
-                    );
-
-                    let lines = [];
-                    let n;
-                    while (n = walker.nextNode()) {
-                        lines.push(n.textContent.trim());
-                    }
-
-                    return lines.join("\\n");
-                }
-                """
-            )
-
-        except PlaywrightTimeout:
-            text = "ERROR: Page load timed out"
-
-        finally:
-            context.close()
-            browser.close()
-
-    # LLM safety cap
-    return text[:50_000]
+debug = True
 
 class ReasoningStdOutCallback(BaseCallbackHandler):
     def __init__(self):
@@ -176,6 +78,7 @@ class ReasoningStdOutCallback(BaseCallbackHandler):
             text = entries.get("text", None)
             if text:
                 print(f"RESPONDING\n{text}")
+                tts(text)
 
     def get_raw_text(self):
         return "".join(self.tokens)
@@ -204,6 +107,8 @@ def web_search(query: str) -> str:
         )
         if debug:
             print("\n======== web search ==========")
+            print(f"query:{query}")
+            print("========")
             print(ret)
             print("==============================", flush=True)
         return ret
@@ -211,18 +116,30 @@ def web_search(query: str) -> str:
 @tool
 def read_web_page(url: str) -> str:
     """
-    Fetch and read the contents of a web page, extracting visible text for further analysis.
+    Render a web page locally and return LLM-suitable visible text.
     """
-    try:
-        res = render_page(url)
-        if debug:
-            print("\n======== page read ==========")
-            print(res[:5000])  # preview only
-            print("==============================", flush=True)
-        return res
-    except Exception as e:
-        return f"Failed to render page: {e}"
-    
+    # """
+    # Render and read a web page using a local JS-capable browser.
+    # """
+    payload = {
+        "startUrls": [url],
+        "maxPages": 1,
+        "maxDepth": 0,
+        "sameOriginOnly": True,
+        "waitUntil": "domcontentloaded",
+        "includeLinks": False,
+        "includeHtml": False,
+        "timeoutSecs": 30,
+    }
+    result = _post_crawl(payload)
+    res = _shape_pages_for_llm(result, mode="fetch")
+    if debug:
+        print("\n======== page read ==========")
+        print(res[:5000])  # preview only
+        print("==============================", flush=True)
+    return res
+
+
 # ---- Model ----
 
 llm = ChatOpenAI(
@@ -307,6 +224,13 @@ Behavior:
 - Use tools when they provide more accurate or up-to-date information than internal knowledge.
 - If a tool is required to answer accurately, invoke it instead of guessing.
 
+Spoken-output requirements (mandatory):
+- All numbers MUST be spelled out in words.
+- Units MUST be written in full words.
+- Abbreviations, symbols, and numerals are NOT allowed.
+- Sentences MUST be short and declarative.
+- Write exactly what should be spoken aloud.
+
 Context:
 - Location: Conshohocken, PA 19428
 - Date: {date.today()}
@@ -314,7 +238,9 @@ Context:
 """
         ),
         HumanMessage(
-            content="What is tomorrow's weather"
+            content="""
+What's tomorrow's weather
+"""
         )
     ]
 })

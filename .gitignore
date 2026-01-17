@@ -6,3 +6,13 @@ __pycache__
 
 # locally checked out langchain
 langchain
+**/node_modules
+**/package-lock.json
+
+scraper/Dockerfile
+
+# no voice models checked in
+ha/voice
+
+# working directory for the scraper
+scraper/storage

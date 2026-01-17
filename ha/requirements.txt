@@ -10,3 +10,10 @@ readability-lxml
 lxml
 aiohttp
 bs4
+
+piper-tts
+sounddevice
+ddgs
+
+numpy
+onnxruntime

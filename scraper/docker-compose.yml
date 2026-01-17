@@ -1,0 +1,21 @@
+services:
+  scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      no_cache: true
+    # command: node --watch src/server.mjs
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=dev
+      - PORT=3000
+      - STORAGE_DIR=/app/storage
+      - PLAYWRIGHT_BROWSERS_PATH=0
+    volumes:
+      - ./storage:/app/storage:rw
+      - ./src:/app/src
+      - ./package.json:/app/package.json:ro
+      - ./package-lock.json:/app/package-lock.json:ro
+      - ./node_modules:/app/node_modules:ro
+    shm_size: "1gb"

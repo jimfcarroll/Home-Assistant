@@ -1,0 +1,22 @@
+{
+  "name": "local-apify-scraper",
+  "version": "0.1.0",
+  "type": "module",
+
+  "scripts": {
+    "dev": "nodemon --watch src --ext js,mjs,json --signal SIGTERM src/server.mjs",
+    "start": "node src/server.mjs"
+  },
+
+  "dependencies": {
+    "crawlee": "^3.10.0",
+    "express": "^4.19.2",
+    "p-limit": "^6.2.0",
+    "zod": "^3.24.1",
+    "playwright": "^1.56.1"
+  },
+
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
