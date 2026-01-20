@@ -1,8 +1,5 @@
-from typing import Optional
-
 import numpy as np
 import sounddevice as sd
-from langchain_core.messages import AIMessage, BaseMessage
 from piper.voice import PiperVoice
 
 # NOTE:

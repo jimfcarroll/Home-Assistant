@@ -1,19 +1,15 @@
-langchain[all]
-langgraph
-langchain-openai
-langchain-community
-
-duckduckgo-search
-requests
-pydantic
-readability-lxml
-lxml
-aiohttp
-bs4
-
-piper-tts
-sounddevice
+# duck duck go search
 ddgs
 
-numpy
-onnxruntime
+# Voice - stt
+vosk
+sounddevice
+
+# Voice tts
+piper-tts
+
+# ADK
+google-adk
+#   ADK optional dependency
+litellm
+

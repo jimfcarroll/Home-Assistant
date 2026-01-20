@@ -1,11 +1,8 @@
-from typing import Optional, Dict, Any
 import requests
-from langchain_core.tools import tool
+from typing import Dict, Any
 
-CRAWLER_URL = "http://127.0.0.1:3000/crawl"  # adjust to your node container/port
-
-def _post_crawl(payload: Dict[str, Any]) -> Dict[str, Any]:
-    r = requests.post(CRAWLER_URL, json=payload, timeout=(5, max(10, payload.get("timeoutSecs", 30) + 5)))
+def _post_crawl(crawler_url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    r = requests.post(crawler_url, json=payload, timeout=(5, max(10, payload.get("timeoutSecs", 30) + 5)))
     r.raise_for_status()
     return r.json()
 
@@ -73,64 +70,4 @@ def _shape_pages_for_llm(result: Dict[str, Any], *, mode: str = "crawl") -> str:
         lines.append("")
 
     return "\n".join(lines).strip()
-
-@tool
-def crawl_web(
-    startUrls: list[str],
-    maxPages: int = 5,
-    maxDepth: int = 1,
-    sameOriginOnly: bool = True,
-    concurrency: int = 3,
-    waitUntil: str = "domcontentloaded",
-    includeLinks: bool = True,
-    includeHtml: bool = False,
-    timeoutSecs: Optional[int] = 30,
-    userAgent: Optional[str] = None,
-) -> str:
-    """
-    Render and crawl pages (JS-capable) using a local Crawlee+Playwright service.
-    Returns structured summaries of pages plus a sample of links.
-    """
-    payload = {
-        "startUrls": startUrls,
-        "maxPages": maxPages,
-        "maxDepth": maxDepth,
-        "sameOriginOnly": sameOriginOnly,
-        "concurrency": concurrency,
-        "waitUntil": waitUntil,
-        "includeLinks": includeLinks,
-        "includeHtml": includeHtml,
-        "timeoutSecs": timeoutSecs,
-        "userAgent": userAgent,
-    }
-    result = _post_crawl(payload)
-    return _shape_pages_for_llm(result, mode="crawl")
-
-@tool
-def fetch_web(
-    url: str,
-    waitUntil: str = "domcontentloaded",
-    includeLinks: bool = True,
-    includeHtml: bool = False,
-    timeoutSecs: Optional[int] = 30,
-    userAgent: Optional[str] = None,
-) -> str:
-    """
-    Render and extract a single page (JS-capable) using a local Crawlee+Playwright service.
-    Returns fuller text for the page (still capped).
-    """
-    payload = {
-        "startUrls": [url],
-        "maxPages": 1,
-        "maxDepth": 0,
-        "sameOriginOnly": False,
-        "concurrency": 1,
-        "waitUntil": waitUntil,
-        "includeLinks": includeLinks,
-        "includeHtml": includeHtml,
-        "timeoutSecs": timeoutSecs,
-        "userAgent": userAgent,
-    }
-    result = _post_crawl(payload)
-    return _shape_pages_for_llm(result, mode="fetch")
 

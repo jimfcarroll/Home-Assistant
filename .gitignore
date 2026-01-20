@@ -12,7 +12,7 @@ langchain
 scraper/Dockerfile
 
 # no voice models checked in
-ha/voice
+ha/voice-models
 
 # working directory for the scraper
 scraper/storage
